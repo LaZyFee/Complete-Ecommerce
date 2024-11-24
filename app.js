@@ -8,7 +8,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
-import router from "./src/routes/api"
+import router from "./src/routes/api.js"
 
 
 const app = express();
