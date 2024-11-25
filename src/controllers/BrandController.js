@@ -1,4 +1,4 @@
-import { BrandListService } from "../service/ProductServices.js";
+import { BrandListService } from "../services/ProductServices.js";
 
 export const BrandList = async (req, res) => {
   let result = await BrandListService();

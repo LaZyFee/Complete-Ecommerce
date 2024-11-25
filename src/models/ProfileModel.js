@@ -1,24 +1,26 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const DataSchema = mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId },
-    cus_add: { type: string },
-    cus_city: { type: string },
-    cus_country: { type: string },
-    cus_fax: { type: string },
-    cus_name: { type: string },
-    cus_phone: { type: string },
-    cus_postcode: { type: string },
-    cus_state: { type: string },
-    ship_add: { type: string },
-    ship_city: { type: string },
-    ship_country: { type: string },
-    ship_name: { type: string },
-    ship_phone: { type: string },
-    ship_postcode: { type: string },
-    ship_state: { type: string },
+    cus_add: { type: String },
+    cus_city: { type: String },
+    cus_country: { type: String },
+    cus_fax: { type: String },
+    cus_name: { type: String },
+    cus_phone: { type: String },
+    cus_postcode: { type: String },
+    cus_state: { type: String },
+    ship_add: { type: String },
+    ship_city: { type: String },
+    ship_country: { type: String },
+    ship_name: { type: String },
+    ship_phone: { type: String },
+    ship_postcode: { type: String },
+    ship_state: { type: String },
 },
-    { timestamps: true }
+    {
+        timestamps: true,
+    }
 
 )
 

@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
 const DataSchema = mongoose.Schema({
-    email: { type: string, required: true, unique: true, lowwercase: true },
-    otp: { type: string, required: true }
+    email: { type: String, required: true, unique: true, lowwercase: true },
+    otp: { type: String, required: true }
 },
     {
-        timestamps: true
+        timestamps: true,
     }
 )
 

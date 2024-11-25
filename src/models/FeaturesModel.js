@@ -1,15 +1,11 @@
 import mongoose from "mongoose";
 
 const DataSchema = mongoose.Schema({
-    name: { types: string, required: true },
-    des: { types: string, required: true },
-    img: { types: string, required: true },
+    name: { type: String, required: true },
+    des: { type: String, required: true },
+    img: { type: String, required: true },
+}, {
+    timestamps: true,
+});
 
-
-
-},
-    {
-        tiemstamps: true
-    }
-)
-export const FeaturesModel = ("feature", DataSchema)
+export const FeaturesModel = mongoose.model("feature", DataSchema);

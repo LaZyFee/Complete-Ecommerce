@@ -1,19 +1,16 @@
 import mongoose from "mongoose";
 
 const DataSchema = mongoose.Schema({
-    store_id: { types: string, required: true },
-    store_passwd: { types: string, required: true },
-    currency: { types: string, required: true },
-    success_url: { types: string, required: true },
-    fail_url: { types: string, required: true },
-    cancel_url: { types: string, required: true },
-    ipn_url: { types: string, required: true },
-    init_url: { types: string, required: true },
+    store_id: { type: String, required: true },
+    store_passwd: { type: String, required: true },
+    currency: { type: String, required: true },
+    success_url: { type: String, required: true },
+    fail_url: { type: String, required: true },
+    cancel_url: { type: String, required: true },
+    ipn_url: { type: String, required: true },
+    init_url: { type: String, required: true },
+}, {
+    timestamps: true,
+});
 
-
-},
-    {
-        tiemstamps: true
-    }
-)
-export const PaymrntSettingsModel = ("paymentsetting", DataSchema)
+export const PaymentSettingsModel = mongoose.model("paymentsetting", DataSchema);

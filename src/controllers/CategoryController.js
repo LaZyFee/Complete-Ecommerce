@@ -1,4 +1,4 @@
-import { CategoryListService } from "../service/ProductServices.js";
+import { CategoryListService } from "../services/ProductServices.js";
 
 export const CategoryList = async (req, res) => {
   let result = await CategoryListService();

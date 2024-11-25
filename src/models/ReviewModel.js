@@ -7,7 +7,7 @@ const DataSchema = mongoose.Schema({
     rating: { type: String, required: true }
 },
     {
-        timestamps: true
+        timestamps: true,
     }
 )
 

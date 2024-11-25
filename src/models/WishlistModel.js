@@ -6,7 +6,7 @@ const DataSchema = mongoose.Schema({
 
 },
     {
-        timestamps: true
+        timestamps: true,
     }
 )
 

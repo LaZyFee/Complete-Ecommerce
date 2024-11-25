@@ -1,16 +1,13 @@
 import mongoose from "mongoose";
 
 const DataSchema = mongoose.Schema({
-    title: { type: string, required: true },
-    des: { type: string, required: true },
-    color: { type: string, required: true },
-    size: { type: string, required: true },
+    title: { type: String, required: true },
+    des: { type: String, required: true },
+    color: { type: String, required: true },
+    size: { type: String, required: true },
+    productID: { type: mongoose.Schema.Types.ObjectId, required: true },
+}, {
+    timestamps: true,
+});
 
-    productID: { type: mongoose.Schema.Types.objectId, required: true }
-
-},
-    {
-        timestamps: "true"
-    }
-)
-export const ProductSliderModel = mongoose.model("productslider", DataSchema)
+export const ProductSliderModel = mongoose.model("productslider", DataSchema);
