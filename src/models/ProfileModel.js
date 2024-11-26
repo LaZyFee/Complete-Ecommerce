@@ -24,4 +24,4 @@ const DataSchema = mongoose.Schema({
 
 )
 
-export const ProfileModel = mongoose.model("profilemodel", DataSchema)
+export const ProfileModel = mongoose.model("profile", DataSchema)
