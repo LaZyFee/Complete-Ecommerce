@@ -259,69 +259,80 @@ export const ListByKeywordService = async (req) => {
     };
   }
 };
+
 export const DetailsService = async (req) => {
   try {
-    let ProductID = new mongoose.Types.ObjectId(req.params.ProductID);
-    let MatchStage = { $match: { _id: ProductID } };
-    let JoinWithBrandStage = {
-      $lookup: {
-        from: "brands",
-        localField: "brandID",
-        foreignField: "_id",
-        as: "brand",
-      },
-    };
-    let JoinWithCategoryStage = {
-      $lookup: {
-        from: "categories",
-        localField: "categoryID",
-        foreignField: "_id",
-        as: "category",
-      },
-    };
-    let JoinWithDetailsStage = {
-      $lookup: {
-        from: "productdetails",
-        localField: "_id",
-        foreignField: "productID",
-        as: "details",
-      },
-    };
+    // Convert ProductID to ObjectId
+    const ProductID = new mongoose.Types.ObjectId(req.params.ProductID);
 
-    let UnwindBrandStage = { $unwind: "$brand" };
-    let UnwindCategoryStage = { $unwind: "$category" };
-    let UnwindDetailsStage = { $unwind: "$details" };
-
-    let ProjectionStage = {
-      $project: {
-        "brand._id": 0,
-        "category._id": 0,
-        categoryID: 0,
-        brandID: 0,
+    // Aggregation pipeline
+    const pipeline = [
+      { $match: { _id: ProductID } }, // Ensure _id is matched as ObjectId
+      {
+        $lookup: {
+          from: "brands",
+          localField: "brandID",
+          foreignField: "_id",
+          as: "brand",
+        },
       },
-    };
+      {
+        $lookup: {
+          from: "categories",
+          localField: "categoryID",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $lookup: {
+          from: "productdetails",
+          localField: "_id",
+          foreignField: "productID",
+          as: "details",
+        },
+      },
+      {
+        $unwind: {
+          path: "$brand",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: "$details",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          "brand._id": 0,
+          "category._id": 0,
+          categoryID: 0,
+          brandID: 0,
+        },
+      },
+    ];
 
-    let data = await ProductModel.aggregate([
-      MatchStage,
-      JoinWithBrandStage,
-      JoinWithCategoryStage,
-      JoinWithDetailsStage,
-      UnwindBrandStage,
-      UnwindCategoryStage,
-      UnwindDetailsStage,
-      ProjectionStage,
-    ]);
-    return {
-      status: "success",
-      data: data,
-    };
+
+    // Execute aggregation
+    const data = await ProductModel.aggregate(pipeline);
+
+
+    return { status: "success", data: data };
   } catch (e) {
-    return {
-      status: "fail",
-      data: e.toString(),
-    };
+    console.error("Error in DetailsService:", e);
+    return { status: "fail", data: e.toString() };
   }
 };
+
+
 export const ReviewListService = async () => {
   try {
     let data = await BrandModel.find();
