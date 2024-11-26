@@ -29,6 +29,7 @@ router.post("/UpdateCart", CartListController.UpdateCart);
 router.post("/RemoveCart", CartListController.RemoveCart);
 
 //Review
+router.get("/reviews/:productID", ProductController.ProductReviewListByID);
 router.post("/CreateProductReview", ProductController.CreateProductReview);
 
 // Wish
