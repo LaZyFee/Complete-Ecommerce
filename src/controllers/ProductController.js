@@ -8,6 +8,7 @@ import {
 } from "./../services/ProductServices.js";
 
 import { ReviewModel } from "../models/ReviewModel.js"
+import { ProfileModel } from "../models/ProfileModel.js";
 
 export const ProductListBySlider = async (req, res) => {
   let result = await SliderListService();
@@ -49,18 +50,42 @@ export const ProductReviewListByID = async (req, res) => {
     // Find all reviews for the specified product ID
     const reviews = await ReviewModel.find({ productID });
 
+    // Extract user IDs from the reviews
+    const userIds = reviews.map((review) => review.userID);
+
+    // Fetch customer profiles for all userIDs and project only cus_name
+    const customerProfiles = await ProfileModel.find(
+      { userId: { $in: userIds } },
+      "userId cus_name"
+    );
+
+    // Map reviews with corresponding customer names
+    const reviewsWithCustomerNames = reviews.map((review) => {
+      // Find matching profile for the review's userID
+      const customer = customerProfiles.find(
+        (profile) => profile.userId && profile.userId.toString() === review.userID.toString()
+      );
+      return {
+        ...review.toObject(),
+        customerName: customer ? customer.cus_name : "Unknown", // Add customer name or default to "Unknown"
+      };
+    });
+
     return res.status(200).json({
       status: "Success",
       message: "Reviews fetched successfully.",
-      data: reviews,
+      data: reviewsWithCustomerNames,
     });
   } catch (e) {
+    console.error("Error fetching reviews:", e);
     return res.status(500).json({
       status: "Fail",
       message: e.toString(),
     });
   }
 };
+
+
 
 export const CreateProductReview = async (req, res) => {
   try {

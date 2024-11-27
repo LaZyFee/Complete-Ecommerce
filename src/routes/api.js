@@ -29,7 +29,6 @@ router.post("/UpdateCart", CartListController.UpdateCart);
 router.post("/RemoveCart", CartListController.RemoveCart);
 
 //Review
-router.get("/reviews/:productID", ProductController.ProductReviewListByID);
 router.post("/CreateProductReview", ProductController.CreateProductReview);
 
 // Wish
@@ -44,7 +43,7 @@ router.get("/ProductListByRemark/:Remark", ProductController.ProductListByRemark
 router.get("/ProductListByBrand/:BrandID", ProductController.ProductListByBrand);
 router.get("/ProductDetailsID/:ProductID", ProductController.ProductDetailsID);
 router.get("/ProductListByKeyword/:keyword", ProductController.ProductListByKeyword);
-router.get("/ProductReviewListByID", ProductController.ProductReviewListByID);
+router.get("/ProductReviewListByID/:productID", ProductController.ProductReviewListByID);
 
 // Invoice
 router.post("/CreateInvoice", InvoiceController.CreateInvoice);
