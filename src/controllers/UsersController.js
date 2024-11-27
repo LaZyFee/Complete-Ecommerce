@@ -1,12 +1,18 @@
 import { UserModel } from "../models/UserModel.js";
 import { ProfileModel } from "../models/ProfileModel.js"
+import { sendVerificationEmail } from "../utility/emailUtility.js";
+import { TokenEncode } from "../utility/tokenUtility.js";
 
 export const Login = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email } = req.body;
 
+    if (!email) {
+      return res.status(400).json({ status: "Fail", message: "Email is required." });
+    }
     // Check if the user already exists
     const existingUser = await UserModel.findOne({ email });
+
     if (existingUser) {
       return res.status(400).json({
         status: "Fail",
@@ -14,26 +20,42 @@ export const Login = async (req, res) => {
       });
     }
 
+    // Generate a new OTP
+    const verificationToken = Math.floor(1000 + Math.random() * 900000).toString();
+
     // Create a new user with the email and OTP
-    const user = await UserModel.create({ email, otp });
+    const user = await UserModel.create({ email, otp: verificationToken });
+
+    // Send verification email
+    await sendVerificationEmail(user.email, verificationToken);
 
     return res.status(201).json({
       status: "Success",
       message: "User successfully registered. Proceed to verify login.",
-      user,
     });
   } catch (e) {
-    return res.status(500).json({ status: "Fail", message: e.toString() });
+    console.error("Error in Login function:", e);
+    return res.status(500).json({ status: "Fail", message: e.message });
   }
 };
-
 
 export const VerifyLogin = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    // Find the user by email and OTP
-    const user = await UserModel.findOne({ email, otp });
+    if (!email || !otp) {
+      return res.status(400).json({
+        status: "Fail",
+        message: "Email and OTP are required.",
+      });
+    }
+
+    // Find and update the user by email and OTP
+    const user = await UserModel.findOneAndUpdate(
+      { email, otp },
+      { $unset: { otp: "" }, $set: { verifiedAt: new Date() } },
+      { new: true }
+    );
 
     if (!user) {
       return res.status(400).json({
@@ -42,10 +64,13 @@ export const VerifyLogin = async (req, res) => {
       });
     }
 
+    // Generate a JWT token using the TokenEncode utility
+    const token = TokenEncode(user.email, user._id);
+
     return res.status(200).json({
       status: "Success",
       message: "Login verified successfully.",
-      user,
+      token,
     });
   } catch (e) {
     return res.status(500).json({ status: "Fail", message: e.toString() });
