@@ -8,12 +8,13 @@ import * as CategoryController from "../controllers/CategoryController.js";
 import * as InvoiceController from "../controllers/InvoiceController.js";
 import * as ProductController from "../controllers/ProductController.js";
 import * as WishListController from "../controllers/WishListController.js";
+import AuthMiddleware from "../middlewares/AuthMiddleware.js";
 
 // Users
 router.post("/Login", UsersController.Login);
 router.post("/VerifyLogin", UsersController.VerifyLogin);
 router.post("/CreateUserProfile", UsersController.CreateUserProfile);
-router.post("/UpdateUserProfile", UsersController.UpdateUserProfile);
+router.put("/UpdateUserProfile", UsersController.UpdateUserProfile);
 router.get("/ReadUserProfile", UsersController.ReadUserProfile);
 
 // Brands
@@ -23,10 +24,10 @@ router.get("/BrandList", BrandController.BrandList);
 router.get("/CategoryList", CategoryController.CategoryList);
 
 // Cart
-router.post("/CreateCart", CartListController.CreateCart);
-router.get("/ReadCartList", CartListController.ReadCartList);
-router.post("/UpdateCart", CartListController.UpdateCart);
-router.post("/RemoveCart", CartListController.RemoveCart);
+router.post("/CreateCart", AuthMiddleware, CartListController.CreateCart);
+router.get("/ReadCartList", AuthMiddleware, CartListController.ReadCartList);
+router.put("/UpdateCart", AuthMiddleware, CartListController.UpdateCart);
+router.delete("/RemoveCart", AuthMiddleware, CartListController.RemoveCart);
 
 //Review
 router.post("/CreateProductReview", ProductController.CreateProductReview);
@@ -34,7 +35,7 @@ router.post("/CreateProductReview", ProductController.CreateProductReview);
 // Wish
 router.post("/CreateWish", WishListController.CreateWish);
 router.get("/ReadWishList", WishListController.ReadWishList);
-router.post("/RemoveWish", WishListController.RemoveWish);
+router.delete("/RemoveWish", WishListController.RemoveWish);
 
 // ProductList
 router.get("/ProductListBySlider", ProductController.ProductListBySlider);
