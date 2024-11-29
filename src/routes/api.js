@@ -47,8 +47,19 @@ router.get("/ProductListByKeyword/:keyword", ProductController.ProductListByKeyw
 router.get("/ProductReviewListByID/:productID", ProductController.ProductReviewListByID);
 
 // Invoice
-router.post("/CreateInvoice", InvoiceController.CreateInvoice);
-router.get("/ReadInvoiceList", InvoiceController.ReadInvoiceList);
-router.get("/ReadInvoiceDetails", InvoiceController.ReadInvoiceDetails);
+router.post("/CreateInvoice", AuthMiddleware, InvoiceController.CreateInvoice);
+// router.get("/ReadInvoiceList", AuthMiddleware, InvoiceController.ReadInvoiceList);
+// router.get("/ReadInvoiceProductList/:invoice_id", InvoiceController.InvoiceProductList);
+
+
+// //payments
+// router.post("/PaymentSuccess/:trxID", InvoiceController.PaymentSuccess)
+// router.post("/PaymentCancel/:trxID", InvoiceController.PaymentCancel)
+// router.post("/PaymentFail/:trxID", InvoiceController.PaymentFail)
+// router.post("/PaymentIPN/:trxID", InvoiceController.PaymentIPN)
+
+
+
+
 
 export default router;
