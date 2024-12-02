@@ -75,6 +75,9 @@ export const CreateInvoice = async (req, res) => {
     // S-2: Prepare Customer Details & Shipping Details
 
     const Profile = await ProfileModel.findOne({ userId: user_id });
+    console.log("User ID:", user_id);
+    console.log("Profile:", Profile);
+
 
     let cus_details = `
                 Name: ${Profile.cus_name},
@@ -134,8 +137,59 @@ export const CreateInvoice = async (req, res) => {
 
     // S-7: Prepare SSL Payment
 
+    let PaymentSettings = await PaymentSettingsModel.find();
+    console.log(PaymentSettings);
+
+    const form = new FormData();
+
+    // Payment info
+    form.append("store_id", PaymentSettings[0].store_id);
+    form.append("store_passwd", PaymentSettings[0].store_passwd);
+    form.append("total_amount", payable.toString());
+    form.append("currency", PaymentSettings[0].currency);
+    form.append("tran_id", tran_id);
+    form.append("success_url", PaymentSettings[0].success_url);
+    form.append("fail_url", PaymentSettings[0].fail_url);
+    form.append("cancel_url", PaymentSettings[0].cancel_url);
+    form.append("ipn_url", PaymentSettings[0].ipn_url);
+
+    // Customer info
+    form.append("cus_name", Profile.cus_name);
+    form.append("cus_email", cus_email);
+    form.append("cus_add1", Profile.cus_add);
+    form.append("cus_add2", Profile.cus_add);
+    form.append("cus_city", Profile.cus_city);
+    form.append("cus_state", Profile.cus_state);
+    form.append("cus_postcode", Profile.cus_postcode);
+    form.append("cus_country", Profile.cus_country);
+    form.append("cus_phone", Profile.cus_phone);
+    form.append("cus_fax", Profile.cus_fax);
+
+    // Ship details
+    form.append("ship_name", Profile.ship_name);
+    form.append("ship_add1", Profile.ship_add);
+    form.append("ship_add2", Profile.ship_add);
+    form.append("ship_city", Profile.ship_city);
+    form.append("ship_state", Profile.ship_state);
+    form.append("ship_postcode", Profile.ship_postcode);
+    form.append("ship_country", Profile.ship_country);
+    form.append("shipping_method", "courier");
+
+    // Product details
+    form.append("product_name", "product name");
+    form.append("product_category", "product category");
+    form.append("product_profile", "product profile");
 
 
+    // SSLCOMMERZ response
+    let SSLres = await axios.post(PaymentSettings[0]['init_url'], form);
+
+    // Extract only the serializable data from the response
+    const SSLResponse = {
+      data: SSLres.data,
+      status: SSLres.status,
+      headers: SSLres.headers,
+    };
 
     // Response to the client
     return res.status(200).json({
@@ -146,6 +200,7 @@ export const CreateInvoice = async (req, res) => {
         vat,
         payable,
         cartProducts,
+        SSLResponse
       },
     });
   } catch (error) {

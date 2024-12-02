@@ -53,7 +53,7 @@ export const VerifyLogin = async (req, res) => {
     // Find and update the user by email and OTP
     const user = await UserModel.findOneAndUpdate(
       { email, otp },
-      { $unset: { otp: "" }, $set: { verifiedAt: new Date() } },
+      { $set: { verifiedAt: new Date() } },
       { new: true }
     );
 
