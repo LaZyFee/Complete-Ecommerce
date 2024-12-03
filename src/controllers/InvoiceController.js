@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import axios from "axios"
 import FormData from "form-data"
+import { ObjectId } from 'mongodb';
+
 
 import { CartModel } from "../models/CartModel.js";
 import { ProfileModel } from "../models/ProfileModel.js";
@@ -75,23 +77,24 @@ export const CreateInvoice = async (req, res) => {
     // S-2: Prepare Customer Details & Shipping Details
 
     const Profile = await ProfileModel.findOne({ userId: user_id });
-    console.log("User ID:", user_id);
-    console.log("Profile:", Profile);
+    // console.log("User ID:", user_id);
+    // console.log("Profile:", Profile);
 
 
-    let cus_details = `
-                Name: ${Profile.cus_name},
-                Email: ${cus_email},
-                Address: ${Profile.cus_add},
-                Phone: ${Profile.cus_phone},
-                `;
+    let cus_details = JSON.stringify({
+      Name: Profile.cus_name,
+      Email: cus_email,
+      Address: Profile.cus_add,
+      Phone: Profile.cus_phone,
+    });
 
-    let ship_details = `
-                Name: ${Profile.ship_name},
-                City: ${Profile.ship_city},
-                Address: ${Profile.ship_add},
-                Phone: ${Profile.ship_phone},
-                `;
+    let ship_details = JSON.stringify({
+      Name: Profile.ship_name,
+      City: Profile.ship_city,
+      Address: Profile.ship_add,
+      Phone: Profile.ship_phone,
+    });
+
 
 
     // S-3: Transaction & other's ID
@@ -138,7 +141,7 @@ export const CreateInvoice = async (req, res) => {
     // S-7: Prepare SSL Payment
 
     let PaymentSettings = await PaymentSettingsModel.find();
-    console.log(PaymentSettings);
+    // console.log(PaymentSettings);
 
     const form = new FormData();
 
@@ -148,10 +151,10 @@ export const CreateInvoice = async (req, res) => {
     form.append("total_amount", payable.toString());
     form.append("currency", PaymentSettings[0].currency);
     form.append("tran_id", tran_id);
-    form.append("success_url", PaymentSettings[0].success_url);
-    form.append("fail_url", PaymentSettings[0].fail_url);
-    form.append("cancel_url", PaymentSettings[0].cancel_url);
-    form.append("ipn_url", PaymentSettings[0].ipn_url);
+    form.append("success_url", `${PaymentSettings[0].success_url}/${tran_id}`);
+    form.append("fail_url", ` ${PaymentSettings[0].fail_url}/${tran_id}`);
+    form.append("cancel_url", `${PaymentSettings[0].cancel_url}/${tran_id}`);
+    form.append("ipn_url", `${PaymentSettings[0].ipn_url}/${tran_id}`);
 
     // Customer info
     form.append("cus_name", Profile.cus_name);
@@ -207,20 +210,140 @@ export const CreateInvoice = async (req, res) => {
     console.error("Error creating invoice:", error);
     return res.status(500).json({
       status: "Fail",
-      Message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+
+// Successful Transaction handling 
+export const PaymentSuccess = async (req, res) => {
+  try {
+    let trxID = req.params.trxID;
+    await InvoiceModel.updateOne({ tran_id: trxID }, { payment_status: "Success" });
+
+    return res.status(200).json({
+      status: "success",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "fail",
+    });
+  }
+};
+
+
+//Cancelled Payment handling
+export const PaymentCancel = async (req, res) => {
+  try {
+    let trxID = req.params.trxID;
+    await InvoiceModel.updateOne({ tran_id: trxID }, { payment_status: "Cancelled" });
+
+    return res.status(200).json({
+      status: "success",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "fail",
+    });
+  }
+};
+
+
+//Failed Payment handling
+export const PaymentFail = async (req, res) => {
+  try {
+    let trxID = req.params.trxID;
+    await InvoiceModel.updateOne({ tran_id: trxID }, { payment_status: "Failed" });
+
+    return res.status(200).json({
+      status: "success",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "fail",
+    });
+  }
+};
+
+export const PaymentIPN = async (req, res) => {
+  try {
+    let trxID = req.params.trxID;
+    let status = req.body['status']
+
+    await InvoiceModel.updateOne({ tran_id: trxID }, { payment_status: status });
+
+    return res.status(200).json({
+      status: "success",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "fail",
     });
   }
 };
 
 
 
-export const ReadInvoiceDetails = async (req, res) => {
+export const InvoiceList = async (req, res) => {
   try {
+    const { user_id } = req.headers;
+    let invoice = await InvoiceModel.find({ userID: user_id })
+
     return res.json({
       status: "Success",
-      Message: "User Successfully Registered",
+      invoice
     });
   } catch (e) {
     return res.json({ status: "Fail", Message: e.toString() });
+  }
+};
+
+
+
+export const InvoiceProductList = async (req, res) => {
+  try {
+    let { user_id } = req.headers;
+    let { invoice_id } = req.params;
+
+    // console.log("User ID:", user_id);
+    // console.log("Invoice ID:", invoice_id);
+
+    // Aggregation Pipeline
+    let matchStage = {
+      $match: {
+        userID: new ObjectId(user_id),
+        invoiceID: new ObjectId(invoice_id),
+      },
+    };
+    let joinStageProduct = {
+      $lookup: {
+        from: "products",
+        localField: "productID", // Ensure this matches the field in your schema
+        foreignField: "_id",
+        as: "product",
+      },
+    };
+    let unwindStage = {
+      $unwind: {
+        path: "$product",
+        preserveNullAndEmptyArrays: true,
+      },
+    };
+
+    // Final Aggregation Result
+    let products = await InvoiceProductModel.aggregate([matchStage, joinStageProduct, unwindStage]);
+    // console.log("Final Aggregation Result:", products);
+
+    // Send Response
+    return res.status(200).json({
+      status: "Success",
+      products,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "Fail",
+      message: e.message || "Internal Server Error",
+    });
   }
 };

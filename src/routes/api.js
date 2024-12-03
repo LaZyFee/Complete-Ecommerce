@@ -48,15 +48,15 @@ router.get("/ProductReviewListByID/:productID", ProductController.ProductReviewL
 
 // Invoice
 router.post("/CreateInvoice", AuthMiddleware, InvoiceController.CreateInvoice);
-// router.get("/ReadInvoiceList", AuthMiddleware, InvoiceController.ReadInvoiceList);
-// router.get("/ReadInvoiceProductList/:invoice_id", InvoiceController.InvoiceProductList);
+router.get("/InvoiceList", AuthMiddleware, InvoiceController.InvoiceList);
+router.get("/InvoiceProductList/:invoice_id", AuthMiddleware, InvoiceController.InvoiceProductList);
 
 
-// //payments
-// router.post("/PaymentSuccess/:trxID", InvoiceController.PaymentSuccess)
-// router.post("/PaymentCancel/:trxID", InvoiceController.PaymentCancel)
-// router.post("/PaymentFail/:trxID", InvoiceController.PaymentFail)
-// router.post("/PaymentIPN/:trxID", InvoiceController.PaymentIPN)
+//payments
+router.post("/PaymentSuccess/:trxID", InvoiceController.PaymentSuccess)
+router.post("/PaymentCancel/:trxID", InvoiceController.PaymentCancel)
+router.post("/PaymentFail/:trxID", InvoiceController.PaymentFail)
+router.post("/PaymentIPN/:trxID", InvoiceController.PaymentIPN)
 
 
 
