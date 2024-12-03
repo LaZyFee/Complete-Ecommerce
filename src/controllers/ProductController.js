@@ -6,6 +6,8 @@ import {
   DetailsService,
   ListByKeywordService,
 } from "./../services/ProductServices.js";
+import { ObjectId } from 'mongodb';
+
 
 import { ReviewModel } from "../models/ReviewModel.js"
 import { ProfileModel } from "../models/ProfileModel.js";
@@ -89,26 +91,25 @@ export const ProductReviewListByID = async (req, res) => {
 
 export const CreateProductReview = async (req, res) => {
   try {
-    const { productID, userID, des, rating } = req.body;
+    const userID = req.headers.user_id;
+    const { productID } = req.params;
+    const { des, rating } = req.body; // Extract description and rating from bod
 
     // Validate required fields
-    if (!productID || !userID || !des || !rating) {
+    if (!des || !rating) {
       return res.status(400).json({
         status: "Fail",
-        message: "All fields (productID, userID, description, and rating) are required.",
+        message: "Description and rating are required.",
       });
     }
 
     // Create a new review document
-    const newReview = new ReviewModel({
-      productID,
-      userID,
+    const newReview = await ReviewModel.create({
+      productID: new ObjectId(productID), // Convert productID to ObjectId
+      userID: new ObjectId(userID), // Convert userID to ObjectId
       des,
       rating,
     });
-
-    // Save the review to the database
-    await newReview.save();
 
     return res.status(201).json({
       status: "Success",
@@ -122,3 +123,4 @@ export const CreateProductReview = async (req, res) => {
     });
   }
 };
+

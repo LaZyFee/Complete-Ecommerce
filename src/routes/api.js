@@ -8,6 +8,7 @@ import * as CategoryController from "../controllers/CategoryController.js";
 import * as InvoiceController from "../controllers/InvoiceController.js";
 import * as ProductController from "../controllers/ProductController.js";
 import * as WishListController from "../controllers/WishListController.js";
+import * as FeatureController from "../controllers/FeatureController.js";
 import AuthMiddleware from "../middlewares/AuthMiddleware.js";
 
 // Users
@@ -29,8 +30,6 @@ router.get("/ReadCartList", AuthMiddleware, CartListController.ReadCartList);
 router.put("/UpdateCart", AuthMiddleware, CartListController.UpdateCart);
 router.delete("/RemoveCart", AuthMiddleware, CartListController.RemoveCart);
 
-//Review
-router.post("/CreateProductReview", ProductController.CreateProductReview);
 
 // Wish
 router.post("/CreateWish", WishListController.CreateWish);
@@ -44,7 +43,11 @@ router.get("/ProductListByRemark/:Remark", ProductController.ProductListByRemark
 router.get("/ProductListByBrand/:BrandID", ProductController.ProductListByBrand);
 router.get("/ProductDetailsID/:ProductID", ProductController.ProductDetailsID);
 router.get("/ProductListByKeyword/:keyword", ProductController.ProductListByKeyword);
+
+// Product review
 router.get("/ProductReviewListByID/:productID", ProductController.ProductReviewListByID);
+router.post("/CreateProductReview/:productID", AuthMiddleware, ProductController.CreateProductReview);
+
 
 // Invoice
 router.post("/CreateInvoice", AuthMiddleware, InvoiceController.CreateInvoice);
@@ -58,6 +61,9 @@ router.post("/PaymentCancel/:trxID", InvoiceController.PaymentCancel)
 router.post("/PaymentFail/:trxID", InvoiceController.PaymentFail)
 router.post("/PaymentIPN/:trxID", InvoiceController.PaymentIPN)
 
+
+//Features
+router.get("/FeatureList", FeatureController.FeatureList);
 
 
 
